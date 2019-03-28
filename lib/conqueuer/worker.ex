@@ -34,7 +34,7 @@ defmodule Conqueuer.Worker do
       use GenServer
 
       def start_link( args \\ [], opts \\[] ) do
-        GenServer.start_link __MODULE__, args, opts
+        GenServer.start_link(__MODULE__, args, opts)
       end
 
       def init(state) do
@@ -43,12 +43,12 @@ defmodule Conqueuer.Worker do
 
       def handle_cast( {:work, foreman, args}, state ) do
         if args == nil do
-          perform state
+          perform(state)
         else
-          perform args, state
+          perform(args, state)
         end
 
-        Conqueuer.Foreman.finished foreman, self
+        Conqueuer.Foreman.finished(foreman, self())
 
         {:noreply, state}
       end
