@@ -57,14 +57,14 @@ defmodule Conqueuer.Pool do
 
       def init([]) do
         pool_options = [
-          name: {:local, name},
-          worker_module: worker,
-          size: size,
-          max_overflow: max_overflow
+          name: {:local, name()},
+          worker_module: worker(),
+          size: size(),
+          max_overflow: max_overflow()
         ]
 
         children = [
-          :poolboy.child_spec(name, pool_options, worker_args)
+          :poolboy.child_spec(name(), pool_options, worker_args())
         ]
 
         supervise(children, strategy: :one_for_one)
