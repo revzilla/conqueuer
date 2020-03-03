@@ -1,18 +1,18 @@
 defmodule Conqueuer.Mixfile do
   use Mix.Project
 
-  def project do
+  def project() do
     [app: :conqueuer,
      version: "0.5.1",
      elixir: "~> 1.1",
-     build_embedded: Mix.env == :prod,
+     build_embedded: Mix.env() == :prod,
      preferred_cli_env: [espec: :test],
-     start_permanent: Mix.env == :prod,
+     start_permanent: Mix.env() == :prod,
      deps: deps(),
      package: package()]
   end
 
-  defp package do
+  defp package() do
     [
       description: "An Elixir in memory work queue.",
       files: [
