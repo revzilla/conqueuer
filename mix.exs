@@ -8,8 +8,8 @@ defmodule Conqueuer.Mixfile do
      build_embedded: Mix.env == :prod,
      preferred_cli_env: [espec: :test],
      start_permanent: Mix.env == :prod,
-     deps: deps,
-     package: package]
+     deps: deps(),
+     package: package()]
   end
 
   defp package do
@@ -32,7 +32,7 @@ defmodule Conqueuer.Mixfile do
   # Configuration for the OTP application
   #
   # Type "mix help compile.app" for more information
-  def application do
+  def application() do
     [applications: [:logger, :inflex, :poolboy]]
   end
 
@@ -45,11 +45,11 @@ defmodule Conqueuer.Mixfile do
   #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
   #
   # Type "mix help deps" for more examples and options
-  defp deps do
+  defp deps() do
     [
       {:espec, "~> 0.8", only: :test},
       {:ex_doc, "~> 0.10", only: :dev},
-        {:earmark, ">= 0.0.0", only: :dev},
+      {:earmark, ">= 0.0.0", only: :dev},
       {:inflex, "~> 1.5"},
       {:poolboy, "~> 1.5"}
     ]
