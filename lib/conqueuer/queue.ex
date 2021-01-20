@@ -7,37 +7,37 @@ defmodule Conqueuer.Queue do
   # Public API ############
 
   def start_link(args \\ [], opts \\ []) do
-    GenServer.start_link __MODULE__, args, opts
+    GenServer.start_link(__MODULE__, args, opts)
   end
 
-  def empty( queue ) do
-    GenServer.cast queue, :empty
+  def empty(queue) do
+    GenServer.cast(queue, :empty)
   end
 
-  def enqueue( queue , item) do
-    GenServer.call queue, {:enqueue, item}
+  def enqueue(queue, item) do
+    GenServer.call(queue, {:enqueue, item})
   end
 
-  def member?( queue , item) do
-    GenServer.call queue, {:member?, item}
+  def member?(queue, item) do
+    GenServer.call(queue, {:member?, item})
   end
 
-  def next( queue ) do
-    GenServer.call queue, :next
+  def next(queue) do
+    GenServer.call(queue, :next)
   end
 
-  def size( queue ) do
-    GenServer.call queue, :size
+  def size(queue) do
+    GenServer.call(queue, :size)
   end
 
   # Private API ############
 
-  def init( args ) do
-    {:ok, %{queue: :queue.new}}
+  def init(_args) do
+    {:ok, %{queue: :queue.new()}}
   end
 
   def handle_cast(:empty, state) do
-    {:noreply, %{state | queue: :queue.new}}
+    {:noreply, %{state | queue: :queue.new()}}
   end
 
   def handle_call({:enqueue, item}, _from, state) do
@@ -55,6 +55,7 @@ defmodule Conqueuer.Queue do
     case :queue.out(queue) do
       {{:value, item}, queue} ->
         {:reply, {:ok, item}, %{state | queue: queue}}
+
       {:empty, {[], []}} ->
         {:reply, :empty, state}
     end
@@ -63,5 +64,4 @@ defmodule Conqueuer.Queue do
   def handle_call(:size, _from, %{queue: queue} = state) do
     {:reply, :queue.len(queue), state}
   end
-
 end

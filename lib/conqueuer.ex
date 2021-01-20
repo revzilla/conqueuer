@@ -92,7 +92,7 @@ defmodule Conqueuer do
   @doc """
   Queues the `args` for the work to be performed to the `name` worker queue.
   """
-  def work( name, args \\ nil ) do
+  def work(name, args \\ nil) do
     {foreman_name, queue_name} = Util.infer_conqueuer_collaborator_names(name)
 
     Conqueuer.Queue.enqueue(queue_name, args)
@@ -104,16 +104,16 @@ defmodule Conqueuer do
 
       Conqueuer.define_pool_supervisor( :resolvers, MyApp.ResolversPoolSupervisor )
   """
-  def define_pool_supervisor( pool_name, supervisor_module, worker_module, worker_args \\ [], opts \\ [] ) do
-    pool_size    = Keyword.get( opts, :pool_size, 2 )
-    max_overflow = Keyword.get( opts, :max_overflow, 0 )
+  def define_pool_supervisor(pool_name, supervisor_module, worker_module, worker_args \\ [], opts \\ []) do
+    pool_size = Keyword.get(opts, :pool_size, 2)
+    max_overflow = Keyword.get(opts, :max_overflow, 0)
 
     Code.eval_string(~s(
       defmodule #{supervisor_module} do
 
         use Conqueuer.Pool, name: :#{pool_name},
                             worker: #{worker_module},
-                            worker_args: #{inspect worker_args},
+                            worker_args: #{inspect(worker_args)},
                             size: #{pool_size},
                             max_overflow: #{max_overflow}
 
@@ -147,7 +147,7 @@ defmodule Conqueuer do
       opts = [strategy: :one_for_one, name: MyApp.Supervisor]
       Supervisor.start_link(children, opts)
   """
-  def child_specs(pool_name, pool_supervisor_module, opts \\ []) do
+  def child_specs(pool_name, pool_supervisor_module, _opts \\ []) do
     import Supervisor.Spec, warn: false
 
     {foreman, pool, pool_supervisor, queue} = Util.infer_collaborator_names(pool_name)
@@ -158,5 +158,4 @@ defmodule Conqueuer do
       worker(Conqueuer.Foreman, [[name: pool], [name: foreman]])
     ]
   end
-
 end

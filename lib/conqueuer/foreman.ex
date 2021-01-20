@@ -41,98 +41,94 @@ defmodule Conqueuer.Foreman do
   @doc """
   Starts the Foreman.
   """
-  def start_link( args \\ [], opts \\ [] ) do
-    GenServer.start_link __MODULE__, args, opts
+  def start_link(args \\ [], opts \\ []) do
+    GenServer.start_link(__MODULE__, args, opts)
   end
 
   @doc """
   Notifies the Foreman work has arrived.
   """
-  def work_arrived( foreman ) do
-    GenServer.cast foreman, :work_arrived
+  def work_arrived(foreman) do
+    GenServer.cast(foreman, :work_arrived)
   end
 
   @doc """
   Notifies the Foreman work has finished.
   """
-  def finished( foreman, worker ) do
-    GenServer.cast foreman, {:finished, worker}
+  def finished(foreman, worker) do
+    GenServer.cast(foreman, {:finished, worker})
   end
 
   # Private API ##########
 
-  def init( args ) do
-    {:ok, name} = Keyword.fetch( args, :name )
+  def init(args) do
+    {:ok, name} = Keyword.fetch(args, :name)
 
-    {pool_name, queue_name} = Util.infer_foreman_collaborator_names( name )
+    {pool_name, queue_name} = Util.infer_foreman_collaborator_names(name)
 
-    {:ok, %{pool_name: pool_name,
-            queue_name: queue_name}}
+    {:ok, %{pool_name: pool_name, queue_name: queue_name}}
   end
 
-  def handle_cast( :work_arrived, state ) do
-    #debug "work arrived"
+  def handle_cast(:work_arrived, state) do
+    # debug "work arrived"
 
-    %{pool_name: pool,
-      queue_name: queue} = state
+    %{pool_name: pool, queue_name: queue} = state
 
-    drain_queue pool, queue
+    drain_queue(pool, queue)
 
     {:noreply, state}
   end
 
-  def handle_cast( {:finished, worker}, state ) do
-    #debug "work finished, checking worker in"
+  def handle_cast({:finished, worker}, state) do
+    # debug "work finished, checking worker in"
 
-    %{pool_name: pool,
-      queue_name: queue} = state
+    %{pool_name: pool, queue_name: queue} = state
 
-    :poolboy.checkin( pool, worker )
-    #debug "Poolboy status: #{inspect :poolboy.status( pool )}"
+    :poolboy.checkin(pool, worker)
+    # debug "Poolboy status: #{inspect :poolboy.status( pool )}"
 
-    drain_queue pool, queue
+    drain_queue(pool, queue)
 
     {:noreply, state}
   end
 
   # Private ##########
 
-  defp drain_queue( pool, queue ) do
-    #debug "draining queue"
+  defp drain_queue(pool, queue) do
+    # debug "draining queue"
 
-    case :poolboy.status( pool ) do
+    case :poolboy.status(pool) do
       {:ready, _, _, _} ->
-        do_work pool, queue
+        do_work(pool, queue)
 
       {:overflow, _, _, _} ->
-        do_work pool, queue
+        do_work(pool, queue)
 
       {:full, _, _, _} ->
-        #warn "pool exhausted, stopping drain"
+        # warn "pool exhausted, stopping drain"
         :exhausted
     end
   end
 
-  defp do_work( pool, queue ) do
-    case queue_next( queue ) do
+  defp do_work(pool, queue) do
+    case queue_next(queue) do
       {:ok, args} ->
-        worker = :poolboy.checkout( pool )
-        GenServer.cast worker, {:work, self, args}
-        drain_queue pool, queue
+        worker = :poolboy.checkout(pool)
+        GenServer.cast(worker, {:work, self(), args})
+        drain_queue(pool, queue)
 
       :empty ->
-        #debug "queue empty, stopping drain"
+        # debug "queue empty, stopping drain"
         :empty
     end
   end
 
-  defp queue_next( queue ) do
-    Conqueuer.Queue.next queue
+  defp queue_next(queue) do
+    Conqueuer.Queue.next(queue)
   end
 
-  defp debug( msg ), do: Logger.debug "#{log_label} #{msg}"
-  defp warn( msg ),  do: Logger.warn "#{log_label} #{msg}"
+  defp debug(msg), do: Logger.debug("#{log_label()} #{msg}")
+  defp warn(msg), do: Logger.warn("#{log_label()} #{msg}")
 
-  defp log_label, do: "[#{Util.registered_name self}]"
-
+  defp log_label, do: "[#{Util.registered_name(self())}]"
 end
