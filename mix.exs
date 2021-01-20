@@ -2,14 +2,16 @@ defmodule Conqueuer.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :conqueuer,
-     version: "0.5.1",
-     elixir: "~> 1.1",
-     build_embedded: Mix.env == :prod,
-     preferred_cli_env: [espec: :test],
-     start_permanent: Mix.env == :prod,
-     deps: deps,
-     package: package]
+    [
+      app: :conqueuer,
+      version: "0.5.1",
+      elixir: "~> 1.1",
+      build_embedded: Mix.env() == :prod,
+      preferred_cli_env: [espec: :test],
+      start_permanent: Mix.env() == :prod,
+      deps: deps(),
+      package: package()
+    ]
   end
 
   defp package do
@@ -49,7 +51,7 @@ defmodule Conqueuer.Mixfile do
     [
       {:espec, "~> 0.8", only: :test},
       {:ex_doc, "~> 0.10", only: :dev},
-        {:earmark, ">= 0.0.0", only: :dev},
+      {:earmark, ">= 0.0.0", only: :dev},
       {:inflex, "~> 1.5"},
       {:poolboy, "~> 1.5"}
     ]
